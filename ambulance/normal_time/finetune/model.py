@@ -228,17 +228,22 @@ class AC_BERT(nn.Module):
 
         self.softmax = nn.Softmax(dim=-1)
 
+        self.cls = nn.Parameter(torch.randn([2,hidden_dim]),requires_grad=True)
+
     def pretrain(self, order, x_state, x_order, order_num=None):
         return self.assignment_net(order, x_state, x_order, order_num)
 
     def encode(self, order, x_state, x_order, order_num=None):
         worker, order = self.assignment_net.encode(order, x_state, x_order, order_num)
-        x = torch.concat([worker, order], dim=0).unsqueeze(0)
+        x = torch.concat([worker, order, self.cls], dim=0).unsqueeze(0)
 
         # x = x.detach()
 
         x_emb = self.bert_actor(inputs_embeds=x, attention_mask=None, output_hidden_states=False)
         x_emb = x_emb.last_hidden_state
+
+        x_emb = x_emb + x
+
         return x_emb
 
     def act(self, order, x_state, x_order, order_num=None, output_prob=False):
@@ -249,7 +254,7 @@ class AC_BERT(nn.Module):
         # order = x_emb2[0, x_state.shape[0]:, :]
 
         worker = x_emb[0, :x_state.shape[0], :]
-        order = x_emb[0, x_state.shape[0]:, :]
+        order = x_emb[0, x_state.shape[0]:-2, :]
 
         p_matrix = self.attention(worker,order)
         p_matrix = self.softmax(p_matrix) + 1e-8
@@ -261,12 +266,17 @@ class AC_BERT(nn.Module):
 
 
     def criticize(self, x_emb, action):
-        worker, order = x_emb[0, :action.shape[0], :], x_emb[0, action.shape[0]:, :]
+        worker, order = x_emb[0, :action.shape[0], :], x_emb[0, action.shape[0]:-2, :]
         valid_indices = (action != -1)
         worker = worker[valid_indices]
         action = action[valid_indices]
-        order = order[action]
-        x = torch.concat([worker,order],dim=-1).unsqueeze(0)
+
+        if len(worker) == 0:
+            x = x_emb[0, -2:, :].view(1,1,-1)
+        else:
+            order = order[action]
+            x = torch.concat([worker,order],dim=-1).unsqueeze(0)
+            x = torch.concat([x,x_emb[0, -2:, :].view(1,1,-1)],dim=1)
 
         # x = x.detach()
 

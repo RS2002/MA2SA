@@ -100,8 +100,8 @@ class Buffer():
             self.pooling_order_next.append(state_next[3])
             self.action_next.append(action_next)
         # self.reward.append(reward)
-
-        self.reward.append(reward/1000)
+        # print(reward)
+        self.reward.append(reward/10)
 
         self.episode.append(episode)
 
@@ -254,7 +254,7 @@ class Worker():
         for target_param, train_param in zip(self.AC_target.parameters(), self.AC_training.parameters()):
             target_param.data.copy_(tau * train_param.data + (1.0 - tau) * target_param.data)
 
-    def reset(self, capacity = 3, train=True):
+    def reset(self, capacity = 1, train=True):
         if train:
             self.AC_training.train()
         else:
@@ -320,12 +320,16 @@ class Worker():
         x1, x2, x3 = torch.tensor(x1).to(self.device), torch.tensor(x2).to(self.device), torch.tensor(x3).to(self.device)
         p_matrix, _ = self.AC_training.act(x1, x2, x3, torch.from_numpy(self.current_order_num).to(self.device))
         # 2. epsilon-greedy explore
-        exploration_matrix = torch.rand_like(p_matrix)
+        # exploration_matrix = torch.rand_like(p_matrix)
+        #
+        # # threshold = np.log(1 / len(order))
+        # # p_matrix[p_matrix<threshold] = -INF
+        #
+        # p_matrix[exploration_matrix < exploration_rate] = INF
 
-        # threshold = np.log(1 / len(order))
-        # p_matrix[p_matrix<threshold] = -INF
+        gaussian_noise = torch.randn_like(p_matrix) * exploration_rate
+        p_matrix = p_matrix + gaussian_noise
 
-        p_matrix[exploration_matrix < exploration_rate] = INF
         p_matrix[self.observe_space[:, 4] == 1] = -INF
 
         return p_matrix.cpu().detach().numpy(), order
@@ -348,9 +352,9 @@ class Worker():
             worker_state, order_state, order_num, pool_order, action, reward, worker_state_next, order_state_next, order_num_next, pool_order_next, action_next = self.buffer.sample(batch_size)
             for i in range(len(worker_state)):
                 worker_state_temp, order_state_temp, order_num_temp, pool_order_temp, action_temp, reward_temp, worker_state_next_temp, order_state_next_temp, order_num_next_temp, pool_order_next_temp, action_next_temp = worker_state[i], order_state[i], order_num[i], pool_order[i], action[i], reward[i], worker_state_next[i], order_state_next[i], order_num_next[i], pool_order_next[i], action_next[i]
-                if torch.all(action_temp == -1):
-                    print("No action_temp")
-                    continue
+                # if torch.all(action_temp == -1):
+                #     # print("No action_temp")
+                #     continue
 
                 if train_critic:
                     if action_next_temp is not None:
@@ -366,16 +370,19 @@ class Worker():
                         # p_matrix2[p_matrix2 < threshold] = -INF
 
                         exploration_rate = random.uniform(0, 0.01)
-                        exploration_matrix = torch.rand_like(p_matrix2)
-                        p_matrix2[exploration_matrix < exploration_rate] = INF
+                        # exploration_matrix = torch.rand_like(p_matrix2)
+                        # p_matrix2[exploration_matrix < exploration_rate] = INF
+                        gaussian_noise = torch.randn_like(p_matrix2) * exploration_rate
+                        p_matrix2 = p_matrix2 + gaussian_noise
+
                         p_matrix2[worker_state_next_temp[:, 4] == 1] = -INF
 
                         action_new2, _ = assign(p_matrix2.cpu().detach().numpy())
                         action_new2 = [-1 if x is None else x for x in action_new2]
                         action_new2 = torch.tensor(action_new2).to(self.device)
-                        if torch.all(action_new2 == -1):
-                            print("No action_next")
-                            continue
+                        # if torch.all(action_new2 == -1):
+                        #     # print("No action_next")
+                        #     continue
 
                         q_value_next2 = self.AC_target.criticize(x_emb2, action_new2)
 
@@ -405,7 +412,7 @@ class Worker():
                     action_new = [-1 if x is None else x for x in action_new]
                     action_new = torch.tensor(action_new).to(self.device)
                     if torch.all(action_new == -1):
-                        print("No new action_temp")
+                        # print("No new action_temp")
                         continue
                     valid_indices = (action_new != -1)
                     selected_elements = p_matrix[valid_indices, action_new[valid_indices]]

@@ -14,13 +14,13 @@ def get_args():
     parser.add_argument('--train_times', type=int, default=15)
     parser.add_argument('--lr', type=float, default=0.0001)
     parser.add_argument('--gamma', type=float, default=0.99)
-    parser.add_argument('--max_step', type=int, default=30)
+    parser.add_argument('--max_step', type=int, default=60)
     parser.add_argument('--converge_epoch', type=int, default=10)
     parser.add_argument('--minimum_episode', type=int, default=900)
     parser.add_argument('--worker_num', type=int, default=400)
     parser.add_argument('--buffer_capacity', type=int, default=1500)
     parser.add_argument('--buffer_episode', type=int, default=20)
-    parser.add_argument('--demand_sample_rate', type=float, default=0.99)
+    parser.add_argument('--demand_sample_rate', type=float, default=0.95)
     parser.add_argument('--order_max_wait_time', type=float, default=60.0)
     parser.add_argument('--order_threshold', type=float, default=40.0)
     parser.add_argument('--reward_parameter', type=float, nargs='+', default=[10.0,1.0,1.0])
@@ -73,14 +73,10 @@ def main():
     cycle = actor_train
 
 
-    with open(args.zone_dic_path, 'rb') as f:
-        zone_dic = pickle.load(f)
-    zone_table = zone_dic["zone_num"]
-
     platform = Platform(discount_factor=args.gamma, njobs=args.njobs)
     demand = Demand(demand_path=args.demand_path)
     buffer = Buffer(capacity=args.buffer_capacity, episode_capacity=args.buffer_episode)
-    worker = Worker(buffer, lr=args.lr, gamma=args.gamma, max_step=args.max_step, num=args.worker_num, device=device, zone_table_path = args.zone_dic_path, model_path = args.model_path, njobs = args.njobs, bi_direction = args.bi_direction, dropout = args.dropout, compression = compression, pretrain_model_path=args.pretrain_model_path)
+    worker = Worker(buffer, lr=args.lr, gamma=args.gamma, max_step=args.max_step, num=args.worker_num, device=device, hospital_table_path = args.hospital_path, EMS_table = args.ems_path, model_path = args.model_path, njobs = args.njobs, bi_direction = args.bi_direction, dropout = args.dropout, compression = compression, pretrain_model_path=args.pretrain_model_path)
     reward_func = reward_func_generator(args.reward_parameter, args.order_threshold)
 
     best_reward = -1e8
