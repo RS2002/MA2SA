@@ -399,11 +399,30 @@ def single_update(observe_space, current_orders, current_orders_num, current_tra
         if observe_space[3] > step:
             observe_space[3] -= step
             step = 0
+
+            if current_orders_num == 0 and not go_back:
+                step = 60
+                for i in range(len(current_travel_time)):
+                    if step >= current_travel_time[i]:
+                        step -= current_travel_time[i]
+                    else:
+                        current_travel_time[i] -= step
+                        current_travel_time = current_travel_time[i:]
+                        current_travel_route = current_travel_route[i:]
+                        observe_space[0], observe_space[1] = current_travel_route[0][1], current_travel_route[0][0]  # lat, lon
+                        break
+                    if i == len(current_travel_time) - 1:  # finish all orders
+                        observe_space[0], observe_space[1] = current_travel_route[-1][1], current_travel_route[-1][0]  # lat, lon
+                        current_travel_time = []
+                        current_travel_route = []
+
+
         else:  # finish picking up
             step -= observe_space[3]
             observe_space[3] = 0
             if observe_space[2] != 0:  # have available seat
                 observe_space[4] = 0 # update state to available
+                observe_space[0], observe_space[1] = observe_space[6], observe_space[7]
 
     if step > 0 and current_orders_num != 0:
         step_minute = step

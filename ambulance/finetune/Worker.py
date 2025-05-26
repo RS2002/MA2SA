@@ -320,15 +320,14 @@ class Worker():
         x1, x2, x3 = torch.tensor(x1).to(self.device), torch.tensor(x2).to(self.device), torch.tensor(x3).to(self.device)
         p_matrix, _ = self.AC_training.act(x1, x2, x3, torch.from_numpy(self.current_order_num).to(self.device))
         # 2. epsilon-greedy explore
-        # exploration_matrix = torch.rand_like(p_matrix)
-        #
-        # # threshold = np.log(1 / len(order))
-        # # p_matrix[p_matrix<threshold] = -INF
-        #
-        # p_matrix[exploration_matrix < exploration_rate] = INF
+        exploration_matrix = torch.rand_like(p_matrix)
 
-        gaussian_noise = torch.randn_like(p_matrix) * exploration_rate
-        p_matrix = p_matrix + gaussian_noise
+        # threshold = np.log(1 / len(order))
+        # p_matrix[p_matrix<threshold] = -INF
+
+        p_matrix[exploration_matrix < exploration_rate] = INF
+        # uni_noise = torch.rand_like(p_matrix) * exploration_rate * 3.5
+        # p_matrix = p_matrix + uni_noise
 
         p_matrix[self.observe_space[:, 4] == 1] = -INF
 
@@ -370,11 +369,10 @@ class Worker():
                         # p_matrix2[p_matrix2 < threshold] = -INF
 
                         exploration_rate = random.uniform(0, 0.01)
-                        # exploration_matrix = torch.rand_like(p_matrix2)
-                        # p_matrix2[exploration_matrix < exploration_rate] = INF
-                        gaussian_noise = torch.randn_like(p_matrix2) * exploration_rate
-                        p_matrix2 = p_matrix2 + gaussian_noise
-
+                        exploration_matrix = torch.rand_like(p_matrix2)
+                        p_matrix2[exploration_matrix < exploration_rate] = INF
+                        # uni_noise = torch.rand_like(p_matrix2) * exploration_rate * 3.5
+                        # p_matrix2 = p_matrix2 + uni_noise
                         p_matrix2[worker_state_next_temp[:, 4] == 1] = -INF
 
                         action_new2, _ = assign(p_matrix2.cpu().detach().numpy())
@@ -531,11 +529,30 @@ def single_update(observe_space, current_orders, current_orders_num, current_tra
         if observe_space[3] > step:
             observe_space[3] -= step
             step = 0
+
+            if current_orders_num == 0 and not go_back:
+                step = 60
+                for i in range(len(current_travel_time)):
+                    if step >= current_travel_time[i]:
+                        step -= current_travel_time[i]
+                    else:
+                        current_travel_time[i] -= step
+                        current_travel_time = current_travel_time[i:]
+                        current_travel_route = current_travel_route[i:]
+                        observe_space[0], observe_space[1] = current_travel_route[0][1], current_travel_route[0][0]  # lat, lon
+                        break
+                    if i == len(current_travel_time) - 1:  # finish all orders
+                        observe_space[0], observe_space[1] = current_travel_route[-1][1], current_travel_route[-1][0]  # lat, lon
+                        current_travel_time = []
+                        current_travel_route = []
+
         else:  # finish picking up
             step -= observe_space[3]
             observe_space[3] = 0
             if observe_space[2] != 0:  # have available seat
                 observe_space[4] = 0 # update state to available
+                observe_space[0], observe_space[1] = observe_space[6], observe_space[7]
+
 
     if step > 0 and current_orders_num != 0:
         step_minute = step

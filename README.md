@@ -1,6 +1,6 @@
 # MA2SA
 
-**Article: ** under way
+**Article:** under way
 
 
 
