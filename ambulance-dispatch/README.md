@@ -7,7 +7,9 @@
 3. Incident Dispatch: [EMS Incident Dispatch Data | NYC Open Data](https://data.cityofnewyork.us/Public-Safety/EMS-Incident-Dispatch-Data/76xm-jjuj/about_data)
 4. Zip Codes: [US Zip Codes Database | Simplemaps.com](https://simplemaps.com/data/us-zips)
 
+~~The processed data can be found in the `./data` directory.~~
 
+Considering the copyright, we have removed the processed data. However, the data processing code is available in the `./data` directory. Please download the dataset from the link provided above and use our code to process it.
 
 ## 2. How to Run
 
@@ -20,8 +22,6 @@ python train.py
 ```
 
 If you want to simulate a pandemic scenario, please add the `--compression` parameter.
-
-
 
 ### 2.2 Fine-tune
 
