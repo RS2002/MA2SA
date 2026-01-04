@@ -1,8 +1,6 @@
 # MA2SA
 
-**Article:** Zijian Zhao, Sen Li*, "A Centralized Reinforcement Learning Framework for Large-Scale Dynamic Trip-Vehicle Assignment" (under way)
-
-Expanded version of [RS2002/Triple-BERT: Official Repository for The Paper, Triple-BERT: Do We Really Need MARL for Order Dispatch on Ride-Sharing Platforms?](https://github.com/RS2002/Triple-BERT).
+**Article:** Zijian Zhao, Sen Li*, " Centralized Reinforcement Learning for Large-Scale Dynamic Trip-Vehicle Assignment" 
 
 ## 1. Workflow
 
@@ -15,7 +13,7 @@ Expanded version of [RS2002/Triple-BERT: Official Repository for The Paper, Trip
 
 ## 3. Simulator
 
-Please refer to [RS2002/Triple-BERT: Official Repository for The Paper, Triple-BERT: Do We Really Need MARL for Order Dispatch on Ride-Sharing Platforms?](https://github.com/RS2002/Triple-BERT).
+Please refer to [Official Repository for The Paper, Discriminatory Order Assignment and Payment-Setting on Food-Delivery Platforms: A Multi-Action and Multi-Agent Reinforcement Learning Framework](https://github.com/RS2002/Discriminatory-Food-Delivery).
 
 ## 4. References
 
