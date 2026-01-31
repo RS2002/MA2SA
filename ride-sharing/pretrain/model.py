@@ -254,7 +254,8 @@ class ViT(nn.Module):
         super().__init__()
         self.vit = BertModel(bertconfig)
         self.mlp = MLP([input_dim,hidden_dim,hidden_dim],arl=True)
-
+        del self.vit.embeddings.word_embeddings
+        del self.vit.embeddings.position_embeddings
         self.recoverer = MLP([hidden_dim,hidden_dim,input_dim])
         self.predictor = MLP([hidden_dim,hidden_dim,input_dim])
 
@@ -290,6 +291,14 @@ class AC_BERT(nn.Module):
         self.critic2 = Sequence_Classifier(class_num=1, hs=hidden_dim*2, da=hidden_dim*2, r=4)
 
         self.softmax = nn.Softmax(dim=-1)
+
+        del self.bert_actor.embeddings.word_embeddings
+        del self.bert_actor.embeddings.position_embeddings
+        del self.bert_critic1.embeddings.word_embeddings
+        del self.bert_critic1.embeddings.position_embeddings
+        del self.bert_critic2.embeddings.word_embeddings
+        del self.bert_critic2.embeddings.position_embeddings
+
 
     def pretrain(self, order, x_state, x_order, order_num=None):
         return self.assignment_net(order, x_state, x_order, order_num)

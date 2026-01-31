@@ -1,8 +1,10 @@
 # MA2SA
 
-**Article:** Zijian Zhao, Sen Li*, " Centralized Reinforcement Learning for Large-Scale Dynamic Trip-Vehicle Assignment" 
+**Article:** Zijian Zhao, Sen Li*, " Beyond Multi‑Agent Reinforcement Learning: Scalable Centralized Control for Large-Scale Dynamic Trip-Vehicle Assignment" 
 
 ## 1. Workflow
+
+![](./img/compare.png)
 
 ![](./img/main.png)
 
