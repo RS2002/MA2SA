@@ -1,0 +1,29 @@
+{
+  "joint_episodes": 16,
+  "monitor_episodes": [
+    0,
+    4,
+    8,
+    12,
+    16
+  ],
+  "warmup_collection_episodes": 2,
+  "warmup_updates": 256,
+  "update_every_steps": 4,
+  "replay_capacity": 600,
+  "batch_size": 2,
+  "actor_lr": 2e-06,
+  "critic_lr": 0.0001,
+  "gamma": 0.99,
+  "tau": 0.005,
+  "gradient_clip": 1.0,
+  "team_reward_scale": 1000.0,
+  "policy_delay": 2,
+  "target_noise": 0.05,
+  "noise_clip": 0.1,
+  "baseline_samples": 8,
+  "collection_noise": 0.05,
+  "anchor_lambda": 1.0,
+  "regularizer_temperature": 0.1,
+  "per_seed_wall_seconds": 0
+}

@@ -1,0 +1,29 @@
+{
+  "episodes": 64,
+  "monitor_episodes": [
+    0,
+    4,
+    8,
+    16,
+    24,
+    40,
+    56,
+    64
+  ],
+  "width": 64,
+  "rank": 32,
+  "learning_rate": 0.0001,
+  "gamma": 0.99,
+  "target_tau": 0.005,
+  "gradient_clip": 1.0,
+  "reward_scale": 10.0,
+  "auxiliary_weight": 0.01,
+  "allow_idle": false,
+  "replay_capacity": 600,
+  "replay_warmup": 300,
+  "batch_size": 2,
+  "epsilon_start": 0.8,
+  "epsilon_end": 0.05,
+  "epsilon_decay_steps": 9600,
+  "per_seed_wall_seconds": 0
+}
